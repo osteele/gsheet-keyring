@@ -1,8 +1,8 @@
 """This package provides a Keyring_ back end that stores passwords in a Google
 Sheet. It was created for use with the ipython-secrets_ package, that uses
-Kerying to store secrets that are used in a Jupyter notebook. This package
+Keyring to store secrets that are used in a Jupyter notebook. This package
 extends ipython-secret's functionality, to enable it to be used in Colaboratory
-notebooks, and other hosted services that don't support the standard `keyring`
+notebooks, and with other hosted services that don't support the standard `keyring`
 back ends.
 
 .. _Keyring: https://pypi.python.org/pypi/keyring
@@ -28,7 +28,7 @@ UPDATED_AT_COL = 5
 
 
 class GoogleSheetKeyring(keyring.backend.KeyringBackend):
-    """A keyring that stores passwords in Google sheets.
+    """A Keyring back end backed by a Google Sheet.
     """
 
     _sheet_key = None
@@ -45,6 +45,30 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
 
     def __init__(self, *, sheet_key=None, sheet_title=None, sheet_url=None,
                  credentials=None, worksheet=None):
+        """
+        The Google Sheet may be specified with a variety of parameters. They
+        have the precedence `worksheet` > `sheet_url` > `sheet_key` >
+        `sheet_title`. The first non-falsey parameter is used: lower-precedence
+        parameters are silently ignored. If the only non-falsey parameter is
+        `sheet_title` and no sheet with this title is found, a new sheet is
+        created. This is in the only circumstance in which this class will
+        create a new sheet.
+
+        .. _Google Sheet key: https://webapps.stackexchange.com/questions/74205/what-is-the-key-in-my-google-sheets-url
+        .. _gspread Worksheet: https://gspread.readthedocs.io/en/latest/#gspread.models.Worksheet
+
+        Parameters
+        ----------
+        credentials : object
+            `oauth2` credentials.
+        sheet_key : str
+            A `Google Sheet key`_.
+        sheet_title : str
+            A Google Sheet document title.
+        worksheet : :class:`gspread.Worksheet`
+            A `gspread Worksheet`_ instance.
+
+        """
         super().__init__()
         self._sheet_key = sheet_key
         self._sheet_title = sheet_title
@@ -101,6 +125,8 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
         return dt.strftime('%Y-%m-%d %H:%M')
 
     def _find_rows(self, servicename, username):
+        """Get a set of row numbers that match the provided servicename and username.
+        """
         ws = self.sheet
         servicename_rows = {c.row for c in ws.findall(servicename)
                             if c.col == SERVICENAME_COL}
