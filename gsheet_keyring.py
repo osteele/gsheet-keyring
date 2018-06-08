@@ -19,7 +19,7 @@ from keyring.errors import InitError, PasswordDeleteError
 import gspread
 from oauth2client.client import GoogleCredentials
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 SERVICENAME_COL = 1
 USERNAME_COL = 2
