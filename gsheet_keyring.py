@@ -1,9 +1,10 @@
-"""This package provides a Keyring_ back end that stores passwords in a Google
-Sheet. It was created for use with the ipython-secrets_ package, that uses
-Keyring to store secrets that are used in a Jupyter notebook. This package
-extends ipython-secret's functionality, to enable it to be used in Colaboratory
-notebooks, and with other hosted services that don't support the standard `keyring`
-back ends.
+"""This package provides a Keyring back end backed by a Google Sheet.
+
+It was created for use with the ipython-secrets_ package, that uses Keyring_ to
+store secrets that are used in a Jupyter notebook. This package extends
+ipython-secret's functionality, to enable it to be used in Colaboratory
+notebooks, and with other hosted services that don't support the standard
+`keyring` back ends.
 
 .. _Keyring: https://pypi.python.org/pypi/keyring
 .. _ipython-secrets: https://github.com/osteele/ipython-secrets

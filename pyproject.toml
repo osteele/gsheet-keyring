@@ -25,4 +25,4 @@ dev-requires = [
 description-file = "./README.rst"
 
 [tool.flit.entrypoints."keyring.backends"]
-gsheet = "gsheet_keyring.GoogleSheetKeyring"
+gsheet = "gsheet_keyring"
