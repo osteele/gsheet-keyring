@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+die() { echo "$*" 1>&2 ; exit 1; }
+
+git status || die "git status is dirty"
+
+trap "git checkout master" EXIT
+
+git update-ref refs/heads/docs refs/heads/master
+git checkout docs
+pipenv lock -r > requirements.txt
+git add requirements.txt
+git commit -m 'Update requirements.txt'
+git push origin +docs
