@@ -1,0 +1,26 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+
+[scripts]
+test = "pytest"
+lint = "flake8 *.py"
+format = "autopep8 -ir abe tests"
+
+[requires]
+python_full_version = "3.6"
+
+[packages]
+gspread = "*"
+keyring = "*"
+
+[dev-packages]
+autopep8 = "*"
+codecov = "*"
+coverage = "*"
+flake8 = "*"
+pycodestyle = "*"
+pyflakes = "*"
+pytest = "*"
+pytest-cov = "*"
