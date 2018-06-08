@@ -1,0 +1,28 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+dist-name = "gsheet-keyring"
+module = "gsheet_keyring"
+author = "Oliver Steele"
+author-email = "steele@osteele.com"
+home-page = "https://github.com/osteele/gsheet-keyring"
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.6",
+]
+requires = ["gspread" , "keyring", "oauth2client"]
+requires-python = ">=3.5"
+dev-requires = [
+    "bumpversion",
+    "Sphinx",
+    "sphinx_rtd_theme",
+]
+description-file = "./README.rst"
+
+[tool.flit.entrypoints."keyring.backends"]
+gsheet = "gsheet_keyring.GoogleSheetKeyring"

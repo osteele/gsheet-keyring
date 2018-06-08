@@ -1,7 +1,7 @@
 gsheet_keyring
 ==============
 
-|Doc Status|
+|PyPI version| |Doc Status| |License| |Supported Python|
 
 This package provides a _Keyring back end that stores passwords in a Google
 Sheet. It was created for use with the ipython-secrets_ package, that uses
@@ -29,6 +29,7 @@ available:
 
 .. code:: python
 
+   import keyring
    from gsheet_keyring import GoogleSheetKeyring
    keyring.set_keyring(GoogleSheetKeyring())
 
@@ -102,9 +103,18 @@ License
 
 MIT
 
-.. |Doc Status| image:: https://readthedocs.org/projects/ipython-secrets/badge/?version=latest
-    :target: http://ipython-secrets.readthedocs.io/en/latest/?badge=latest
+.. |PyPI version| image:: https://img.shields.io/pypi/v/gsheet-keyring.svg
+    :target: https://pypi.python.org/pypi/gsheet-keyring
+    :alt: Latest PyPI Version
+.. |Doc Status| image:: https://readthedocs.org/projects/gsheet-keyring/badge/?version=latest
+    :target: http://gsheet-keyring.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+.. |License| image:: https://img.shields.io/pypi/l/gsheet-keyring.svg
+    :target: https://pypi.python.org/pypi/gsheet-keyring
+    :alt: License
+.. |Supported Python| image:: https://img.shields.io/pypi/pyversions/gsheet-keyring.svg
+    :target: https://pypi.python.org/pypi/gsheet-keyring
+    :alt: Supported Python Versions
 
 .. _Colaboratory: https://colab.research.google.com/
 .. _Keyring: https://pypi.python.org/pypi/keyring

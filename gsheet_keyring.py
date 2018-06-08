@@ -67,7 +67,6 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
             A Google Sheet document title.
         worksheet : :class:`gspread.Worksheet`
             A `gspread Worksheet`_ instance.
-
         """
         super().__init__()
         self._sheet_key = sheet_key
