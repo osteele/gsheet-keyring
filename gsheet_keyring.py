@@ -7,74 +7,13 @@ Example
 outside of Google Colaboratory, Google Compute Engine, or another environment
 that sets Google OAuth2 credentials automatically.
 
-.. include:: example.py
-   :start-after: start-include
-   :end-before: end-include
-
-.. _Keyring: https://pypi.python.org/pypi/keyring
-.. _ipython-secrets: https://github.com/osteele/ipython-secrets
-
-Caching
-=======
-
-Access to Google Sheets is very slow. This package performs minimal caching —
-just enough to optimize these cases:
-
--  The caller sets and then gets a password.
--  The caller gets a password multiple times.
-
-In order to minimize the risk of using stale data when a notebook is left
-running in a background browser tab while you interact with another tab. The
-cache expires quickly. [#f1]_
-
-.. caution::
-
-  Passwords are stored *unencrypted* in your Google Sheet. Standard security
-  warnings apply:
-
-  -  Don’t share your “keyring” Google Sheet more widely than you want your
-     passwords shared.
-  -  Anyone with access to your Google account has access to these passwords.
-
-     -  This includes anyone who can sign into a laptop or phone that is signed
-        into your Google account.
-
-  -  If you open the spreadsheet in a public place, you are vulnerable to
-     shoulder surfing.
-  -  If you open it within view of a camera, you have leaked your passwords to
-     (today) anyone who can view the stream, or (going forwards) anyone who
-     gains access to a server that stores the stream. (Hello, Nest!)
-  -  Even if you open the spreadsheet in a private place, you’re only as secure
-     as the physical security of the lines of sight (including through windows)
-     to your screen.
-
-.. caution::
-
-  This package’s use of Google Sheets is neither `Atomic, nor Consistent, nor
-  Isolated <https://en.wikipedia.org/wiki/ACID#Characteristics>`_.
-
-  Simultaneous calls to a single writer (a single call to either
-  :func:`~GoogleSheetKeyring.set_password` or
-  :func:`~GoogleSheetKeyring.delete_password`) and/or multiple readers
-  (any number of calls to :func:`~GoogleSheetKeyring.get_password`) should be
-  fine.
-
-  Simultaneous calls (for example, from different Jupyter notebooks) to
-  :func:`~GoogleSheetKeyring.set_password` and/or
-  :func:`~GoogleSheetKeyring.delete_password` can easily corrupt the
-  spreadsheet. If you need this capability, this package (and Google Sheets) is
-  not the right technology to build it on top of. In this case, consider using a
-  hosted database as a back end, or using a hosted key management service
-  instead of Keyring.
-
-.. rubric:: Footnotes
-
-.. [#f1] Data is currently cached for a minute, counting from the last access
-  (to any password, not just the requested password). This is slow by Python
-  execution speed, but fast by human standards. This matches the intended use
-  of the package.
+.. include:: credentials.rst
+.. include:: caching.rst
+.. include:: cautions.rst
+.. include:: links.rst
 """
 
+import os
 import time
 from datetime import datetime
 from functools import lru_cache
@@ -82,7 +21,8 @@ from functools import lru_cache
 import gspread
 import keyring
 from keyring.errors import InitError, PasswordDeleteError
-from oauth2client.client import GoogleCredentials
+from oauth2client.client import ApplicationDefaultCredentialsError, GoogleCredentials
+from oauth2client.service_account import ServiceAccountCredentials
 
 __version__ = '0.1.3'
 
@@ -120,8 +60,6 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
         created. This is in the only circumstance in which this class will
         create a new sheet.
 
-        .. _Google Sheet document key: https://webapps.stackexchange.com/questions/74205/what-is-the-key-in-my-google-sheets-url
-
         Parameters
         ----------
         credentials : :class:`oauth2client.client.GoogleCredentials`, optional
@@ -149,29 +87,25 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
 
         This has the value of the ``credentials`` initialization parameter.
 
-        If this parameter isn't specified and the :module:`oauth2client` package
-        is present, it's computed from
-        :func:`oauth2client.client.GoogleCredentials.get_application_default`.
-
-        If the application default user isn't authenticated and the
-        `google.colab` package is present,
-        :func:`google.colab.auth.authenticate_user` is called to sign in the
-        user.
+        If this parameter isn't specified, the credentials are computed as
+        described in the module documentation.
         """
         if self._credentials:
             return self._credentials
+        credentials_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+        if credentials_path:
+            scope = ['https://www.googleapis.com/auth/drive']
+            return ServiceAccountCredentials.from_json_keyfile_name(
+                credentials_path, scope)
         try:
-            from oauth2client.client import (ApplicationDefaultCredentialsError,
-                                             GoogleCredentials)
+            return GoogleCredentials.get_application_default()
+        except ApplicationDefaultCredentialsError as err:
             try:
-                return GoogleCredentials.get_application_default()
-            except ApplicationDefaultCredentialsError:
                 from google.colab import auth
                 auth.authenticate_user()
                 return GoogleCredentials.get_application_default()
-        except ImportError:
-            pass
-        raise InitError("Unable to create Google OAuth2 credentials")
+            except ImportError:
+                raise err
 
     @property
     @lru_cache(maxsize=1)

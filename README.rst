@@ -1,31 +1,30 @@
-Google Sheet Keyring back end
-=============================
+Google Sheet Keyring backend
+============================
 
 |PyPI version| |Doc Status| |License| |Supported Python|
 
-This package provides a Keyring_ back end that stores passwords in a Google
+This package provides a Keyring_ backend that stores passwords in a Google
 Sheet. It was created for use with the ipython-secrets_ package, that uses
 Kerying to store secrets that are used in a Jupyter notebook. This package
 extends ipython-secret’s functionality, to enable it to be used in Colaboratory_
 notebooks, and other hosted services that don’t support the standard Keyring
-back ends.
+backends.
 
-The Python Keyring_ package is a cross-platform password storage library, that
-supports a variety of `platform-specific back ends`_, as well as a few
-`third-party back ends`_.
+The Python Keyring package is a cross-platform password storage library, that
+supports a variety of `platform-specific backends`_, as well as a few
+`third-party backends`_.
 
-None of these other back ends is compatible with Google Colaboratory. (They may
+None of these other backends is compatible with Google Colaboratory. (They may
 not be compatible with other Jupyter hosting services such as Azure or CoCalc,
-either.)
+either.) That's the problem that this package solves.
 
-To use this package, simply install it via
-``pip3 install gsheet-keyring``, and use the Keyring API as normal. If
-one of the built-in Keyring back ends is available, Keyring will use
-that. If a platform-specific back end is not available, Keyring will
-automatically detect and use this package instead.
+To use this package, install it via ``pip3 install gsheet-keyring``, and use the
+`Keyring API`_ as normal. If one of the built-in Keyring backends is available,
+Keyring will use that. If a platform-specific backend is not available, Keyring
+will automatically detect and use this package instead.
 
-To force Keyring to use this package even if other back ends are
-available:
+Use ``keyring.set_keyring`` to force Keyring to use this package even if other
+backends are available:
 
 .. code:: python
 
@@ -34,11 +33,10 @@ available:
    keyring.set_keyring(GoogleSheetKeyring())
 
 By default, this searches for a Google Sheet named “keyring”. If there’s
-no sheet with this name, it creates one.
+no sheet with this name, one is created.
 
-As an alternative, you can also specify a different Google Sheet name, a `Google
-Sheet key`_, or a `gspread Worksheet`_. See this package's `API documentation`_
-for details on how to do this.
+As an alternative, you may also specify a different Google Sheet name, a Google
+Sheet key, or a Worksheet from the `gspread`_ package.
 
 License
 -------
@@ -60,9 +58,10 @@ MIT
 
 .. _Colaboratory: https://colab.research.google.com/
 .. _Keyring: https://pypi.python.org/pypi/keyring
+.. _Keyring API: https://keyring.readthedocs.io/en/latest/?badge=latest#api-interface
 .. _ipython-secrets: https://github.com/osteele/ipython-secrets
-.. _platform-specific back ends: https://pypi.org/project/keyring/#what-is-python-keyring-lib
-.. _third-party back ends: https://pypi.org/project/keyring/#third-party-backends
+.. _platform-specific backends: https://pypi.org/project/keyring/#what-is-python-keyring-lib
+.. _third-party backends: https://pypi.org/project/keyring/#third-party-backends
 .. _Google Sheet key: https://webapps.stackexchange.com/questions/74205/what-is-the-key-in-my-google-sheets-url
-.. _gspread Worksheet: https://gspread.readthedocs.io/en/latest/#gspread.models.Worksheet
+.. _gspread: https://gspread.readthedocs.io/en/latest/#gspread.models.Worksheet
 .. _API documentation: http://ipython-secrets.readthedocs.io/en/latest/?badge=latest
