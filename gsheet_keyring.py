@@ -114,7 +114,7 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
 
     priority = 0.5
 
-    def __init__(self, *, sheet_key='keyring', sheet_title=None, sheet_url=None,
+    def __init__(self, *, sheet_key=None, sheet_title='keyring', sheet_url=None,
                  credentials=None, worksheet=None):
         """
         The Google Sheet may be specified with a variety of parameters. They
@@ -126,16 +126,18 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
         created. This is in the only circumstance in which this class will
         create a new sheet.
 
-        .. _Google Sheet key: https://webapps.stackexchange.com/questions/74205/what-is-the-key-in-my-google-sheets-url
+        .. _Google Sheet document key: https://webapps.stackexchange.com/questions/74205/what-is-the-key-in-my-google-sheets-url
 
         Parameters
         ----------
         credentials : :class:`oauth2client.client.GoogleCredentials`, optional
             An instance of :class:`oauth2client.client.GoogleCredentials`.
         sheet_key : str, optional
-            A `Google Sheet key`_.
+            A `Google Sheet document key`_.
         sheet_title : str, optional
             A Google Sheet document title. Defaults to ``"keyring"``.
+        sheet_url : str, optional
+            A Google Sheet document URL.
         worksheet : :class:`gspread.models.Worksheet`, optional
             A :class:`gspread.models.Worksheet` instance.
         """
@@ -150,6 +152,11 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
     def credentials(self):
         """An instance of :class:`oauth2client.client.GoogleCredentials`."""
         if not self._credentials:
+            try:
+                from google.colab import auth
+                auth.authenticate_user()
+            except ImportError:
+                pass
             self._credentials = GoogleCredentials.get_application_default()
         return self._credentials
 
@@ -161,10 +168,16 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
             return self._worksheet
         key = self._sheet_key
         title = self._sheet_title
+        url = self._sheet_url
         gc = gspread.authorize(self.credentials)
         if key:
             try:
                 doc = gc.open_by_key(key)
+            except gspread.SpreadsheetNotFound:
+                raise InitError('Spreadsheet not found')
+        elif url:
+            try:
+                doc = gc.open_by_url(url)
             except gspread.SpreadsheetNotFound:
                 raise InitError('Spreadsheet not found')
         else:
