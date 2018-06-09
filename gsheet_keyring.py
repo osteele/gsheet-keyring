@@ -1,10 +1,4 @@
-"""This package provides a Keyring back end backed by a Google Sheet.
-
-It was created for use with the ipython-secrets_ package, that uses Keyring_ to
-store secrets that are used in a Jupyter notebook. This package extends
-ipython-secret's functionality, to enable it to be used in Colaboratory
-notebooks, and with other hosted services that don't support the standard
-Keyring back ends.
+"""This package provides a Keyring backend that is backed by a Google Sheet.
 
 Example
 =======
@@ -81,13 +75,13 @@ cache expires quickly. [#f1]_
   of the package.
 """
 
-from datetime import datetime
 import time
-
-import keyring
-from keyring.errors import InitError, PasswordDeleteError
+from datetime import datetime
+from functools import lru_cache
 
 import gspread
+import keyring
+from keyring.errors import InitError, PasswordDeleteError
 from oauth2client.client import GoogleCredentials
 
 __version__ = '0.1.3'
@@ -149,18 +143,38 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
         self._credentials = credentials
 
     @property
+    @lru_cache(maxsize=1)
     def credentials(self):
-        """An instance of :class:`oauth2client.client.GoogleCredentials`."""
-        if not self._credentials:
+        """An instance of :class:`oauth2client.client.GoogleCredentials`.
+
+        This has the value of the ``credentials`` initialization parameter.
+
+        If this parameter isn't specified and the :module:`oauth2client` package
+        is present, it's computed from
+        :func:`oauth2client.client.GoogleCredentials.get_application_default`.
+
+        If the application default user isn't authenticated and the
+        `google.colab` package is present,
+        :func:`google.colab.auth.authenticate_user` is called to sign in the
+        user.
+        """
+        if self._credentials:
+            return self._credentials
+        try:
+            from oauth2client.client import (ApplicationDefaultCredentialsError,
+                                             GoogleCredentials)
             try:
+                return GoogleCredentials.get_application_default()
+            except ApplicationDefaultCredentialsError:
                 from google.colab import auth
                 auth.authenticate_user()
-            except ImportError:
-                pass
-            self._credentials = GoogleCredentials.get_application_default()
-        return self._credentials
+                return GoogleCredentials.get_application_default()
+        except ImportError:
+            pass
+        raise InitError("Unable to create Google OAuth2 credentials")
 
     @property
+    @lru_cache(maxsize=1)
     def sheet(self):
         """The :class:`gspread.models.Worksheet` that is used as a backing
         store."""
@@ -187,8 +201,7 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
                 doc = gc.create(title)
             except gspread.exceptions.APIError as e:
                 raise InitError(e)
-        self._worksheet = doc.sheet1
-        return self._worksheet
+        return doc.sheet1
 
     @property
     def _cache(self):

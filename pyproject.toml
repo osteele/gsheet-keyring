@@ -26,3 +26,6 @@ description-file = "./README.rst"
 
 [tool.flit.entrypoints."keyring.backends"]
 gsheet = "gsheet_keyring"
+
+[tool.flit.metadata.urls]
+Documentation = "https://gsheet-keyring.readthedocs.io/en/latest/"
