@@ -39,8 +39,9 @@ extensions = ['sphinx.ext.autodoc',
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3.6', None),
-    # 'gsheet': ('http://gsheet.readthedocs.io/en/latest', None),
+    'gspread': ('http://gspread.readthedocs.io/en/latest', None),
     'keyring': ('http://keyring.readthedocs.io/en/latest', None),
+    'oauth2client': ('http://oauth2client.readthedocs.io/en/latest', None),
 }
 
 # Add any paths that contain templates here, relative to this directory.

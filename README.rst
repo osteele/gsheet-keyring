@@ -33,67 +33,12 @@ available:
    from gsheet_keyring import GoogleSheetKeyring
    keyring.set_keyring(GoogleSheetKeyring())
 
-See `example.py <./example.py>`__ for a complete example.
-
 By default, this searches for a Google Sheet named “keyring”. If there’s
 no sheet with this name, it creates one.
 
 As an alternative, you can also specify a different Google Sheet name, a `Google
 Sheet key`_, or a `gspread Worksheet`_. See this package's `API documentation`_
 for details on how to do this.
-
-.. caution::
-
-  Passwords are stored *unencrypted* in your Google Sheet. Standard
-  security warnings apply:
-
-  -  Don’t share your “keyring” Google Sheet more widely than you want
-     your passwords shared.
-  -  Anyone with access to your Google account has access to these
-     passwords.
-
-     -  This includes anyone who can sign into a laptop or phone that is
-        signed into your Google account.
-
-  -  If you open the spreadsheet in a public place, you are vulnerable to
-     shoulder surfing.
-  -  If you open it within view of a camera, you have leaked your
-     passwords to (today) anyone who can view the stream, or (going forwards)
-     anyone who gains access to a server that stores the stream. (Hello,
-     Nest!)
-  -  Even if you open the spreadsheet in a private place, you’re only as
-     secure as the physical security of the lines of sight (including
-     through windows) to your screen.
-
-.. important::
-
-  This package’s use of Google Sheets is neither `Atomic, nor Consistent,
-  nor Isolated <https://en.wikipedia.org/wiki/ACID#Characteristics>`__.
-
-  Concurrent calls to a single writer (``set_password`` or ``delete_password``)
-  and multiple readers (``get_password``) should be be fine.
-
-  Concurrent calls (for example, from different Jupyter notebooks) to
-  ``set_password`` and/or ``delete_password`` can easily corrupt the
-  spreadsheet. If you need this capability, this package (and Google
-  Sheets) is not the right technology to build it on top of. In this case,
-  consider using a hosted database as a back end, or using a hosted key
-  management service instead of Keyring.
-
-Caching
--------
-
-Access to Google Sheets is very slow. This package performs minimal
-caching — just enough to optimize these cases:
-
--  The caller sets and then gets a password.
--  The caller gets a password multiple times.
-
-In order to minimize the risk of using stale data when a notebook is
-left running in a background browser tab while you interact with another
-tab. The cache expires quickly. (Currently a minute. This is slow by
-Python execution speed, but fast by human standards. This matches the
-intended use of the package.)
 
 License
 -------

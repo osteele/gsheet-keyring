@@ -4,10 +4,81 @@ It was created for use with the ipython-secrets_ package, that uses Keyring_ to
 store secrets that are used in a Jupyter notebook. This package extends
 ipython-secret's functionality, to enable it to be used in Colaboratory
 notebooks, and with other hosted services that don't support the standard
-`keyring` back ends.
+Keyring back ends.
+
+Example
+=======
+
+:download:`example.py <./example.py>` is an example of using this package
+outside of Google Colaboratory, Google Compute Engine, or another environment
+that sets Google OAuth2 credentials automatically.
+
+.. include:: example.py
+   :start-after: start-include
+   :end-before: end-include
 
 .. _Keyring: https://pypi.python.org/pypi/keyring
 .. _ipython-secrets: https://github.com/osteele/ipython-secrets
+
+Caching
+=======
+
+Access to Google Sheets is very slow. This package performs minimal caching —
+just enough to optimize these cases:
+
+-  The caller sets and then gets a password.
+-  The caller gets a password multiple times.
+
+In order to minimize the risk of using stale data when a notebook is left
+running in a background browser tab while you interact with another tab. The
+cache expires quickly. [#f1]_
+
+.. caution::
+
+  Passwords are stored *unencrypted* in your Google Sheet. Standard security
+  warnings apply:
+
+  -  Don’t share your “keyring” Google Sheet more widely than you want your
+     passwords shared.
+  -  Anyone with access to your Google account has access to these passwords.
+
+     -  This includes anyone who can sign into a laptop or phone that is signed
+        into your Google account.
+
+  -  If you open the spreadsheet in a public place, you are vulnerable to
+     shoulder surfing.
+  -  If you open it within view of a camera, you have leaked your passwords to
+     (today) anyone who can view the stream, or (going forwards) anyone who
+     gains access to a server that stores the stream. (Hello, Nest!)
+  -  Even if you open the spreadsheet in a private place, you’re only as secure
+     as the physical security of the lines of sight (including through windows)
+     to your screen.
+
+.. caution::
+
+  This package’s use of Google Sheets is neither `Atomic, nor Consistent, nor
+  Isolated <https://en.wikipedia.org/wiki/ACID#Characteristics>`_.
+
+  Simultaneous calls to a single writer (a single call to either
+  :func:`~GoogleSheetKeyring.set_password` or
+  :func:`~GoogleSheetKeyring.delete_password`) and/or multiple readers
+  (any number of calls to :func:`~GoogleSheetKeyring.get_password`) should be
+  fine.
+
+  Simultaneous calls (for example, from different Jupyter notebooks) to
+  :func:`~GoogleSheetKeyring.set_password` and/or
+  :func:`~GoogleSheetKeyring.delete_password` can easily corrupt the
+  spreadsheet. If you need this capability, this package (and Google Sheets) is
+  not the right technology to build it on top of. In this case, consider using a
+  hosted database as a back end, or using a hosted key management service
+  instead of Keyring.
+
+.. rubric:: Footnotes
+
+.. [#f1] Data is currently cached for a minute, counting from the last access
+  (to any password, not just the requested password). This is slow by Python
+  execution speed, but fast by human standards. This matches the intended use
+  of the package.
 """
 
 from datetime import datetime
@@ -41,33 +112,32 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
     __cache = None
     __cache_accessed_at = 0
 
-    # compute priority dynamically based on import error
     priority = 0.5
 
-    def __init__(self, *, sheet_key=None, sheet_title=None, sheet_url=None,
+    def __init__(self, *, sheet_key='keyring', sheet_title=None, sheet_url=None,
                  credentials=None, worksheet=None):
         """
         The Google Sheet may be specified with a variety of parameters. They
         have the precedence `worksheet` > `sheet_url` > `sheet_key` >
-        `sheet_title`. The first non-falsey parameter is used: lower-precedence
-        parameters are silently ignored. If the only non-falsey parameter is
-        `sheet_title` and no sheet with this title is found, a new sheet is
+        `sheet_title`. The first truthy parameter is used. Lower-precedence
+        parameters are silently ignored. For example, if `sheet_url` is truthy,
+        `sheet_key` and `sheet_title` are ignored. If the only truthy parameter
+        is `sheet_title` and no sheet with this title is found, a new sheet is
         created. This is in the only circumstance in which this class will
         create a new sheet.
 
         .. _Google Sheet key: https://webapps.stackexchange.com/questions/74205/what-is-the-key-in-my-google-sheets-url
-        .. _gspread Worksheet: https://gspread.readthedocs.io/en/latest/#gspread.models.Worksheet
 
         Parameters
         ----------
-        credentials : object
-            `oauth2` credentials.
-        sheet_key : str
+        credentials : :class:`oauth2client.client.GoogleCredentials`, optional
+            An instance of :class:`oauth2client.client.GoogleCredentials`.
+        sheet_key : str, optional
             A `Google Sheet key`_.
-        sheet_title : str
-            A Google Sheet document title.
-        worksheet : :class:`gspread.Worksheet`
-            A `gspread Worksheet`_ instance.
+        sheet_title : str, optional
+            A Google Sheet document title. Defaults to ``"keyring"``.
+        worksheet : :class:`gspread.models.Worksheet`, optional
+            A :class:`gspread.models.Worksheet` instance.
         """
         super().__init__()
         self._sheet_key = sheet_key
@@ -78,14 +148,15 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
 
     @property
     def credentials(self):
-        """Google Auth credentials."""
+        """An instance of :class:`oauth2client.client.GoogleCredentials`."""
         if not self._credentials:
             self._credentials = GoogleCredentials.get_application_default()
         return self._credentials
 
     @property
     def sheet(self):
-        """The gspread Google Sheet."""
+        """The :class:`gspread.models.Worksheet` that is used as a backing
+        store."""
         if self._worksheet:
             return self._worksheet
         key = self._sheet_key

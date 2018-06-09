@@ -14,6 +14,7 @@ python_version = "3.6"
 [packages]
 gspread = "*"
 keyring = "*"
+"oauth2client" = "*"
 
 [dev-packages]
 bumpversion = "*"
@@ -21,7 +22,6 @@ flake8 = "*"
 mccabe = "*"
 pycodestyle = "*"
 pyflakes = "*"
-"oauth2client" = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 recommonmark = "*"

@@ -1,18 +1,22 @@
 """An example of the gsheet_keyring API.
 
+.. start-include
+
 This example file depends on the presence of a `GOOGLE_APPLICATION_CREDENTIALS`
-variable, as described in [Getting Started with
-Authentication](https://cloud.google.com/docs/authentication/getting-started).
+variable, as described in `Getting Started with Authentication
+<https://cloud.google.com/docs/authentication/getting-started>`_.
 
-See [the gspread
-wiki](https://github.com/burnash/gspread/wiki/Using-OAuth2-for-Authorization)
-for additional information on getting started with Google Authentication.
+See `the gspread wiki
+<https://github.com/burnash/gspread/wiki/Using-OAuth2-for-Authorization>`_ for
+additional information on getting started with Google Authentication.
 
-If you use gsheet-keyring from Google Colaboratory, Google Compute Engine,or
-[certain other Google hosting
-services](https://cloud.google.com/docs/authentication/production#obtaining_credentials_on_compute_engine_kubernetes_engine_app_engine_flexible_environment_and_cloud_functions),
-you don't to obtain a credentials file. In these cases, you can instantiate
-`GoogleSheetKeyring` without a `credentials` argument.
+If you use gsheet-keyring from Google Colaboratory, Google Compute Engine, or
+`certain other Google hosting services
+<https://cloud.google.com/docs/authentication/production#obtaining_credentials_on_compute_engine_kubernetes_engine_app_engine_flexible_environment_and_cloud_functions>`_,
+you don't need to obtain a credentials file. In these cases, you can instantiate
+:class:`GoogleSheetKeyring` without a ``credentials`` argument.
+
+.. end-include
 """
 import os
 import sys
