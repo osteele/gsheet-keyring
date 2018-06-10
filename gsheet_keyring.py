@@ -24,7 +24,7 @@ from keyring.errors import InitError, PasswordDeleteError
 from oauth2client.client import ApplicationDefaultCredentialsError, GoogleCredentials
 from oauth2client.service_account import ServiceAccountCredentials
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 SERVICENAME_COL = 1
 USERNAME_COL = 2
