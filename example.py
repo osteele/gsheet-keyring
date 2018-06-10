@@ -8,9 +8,6 @@ See `the gspread wiki
 <https://github.com/burnash/gspread/wiki/Using-OAuth2-for-Authorization>`_ for
 additional information on getting started with Google Authentication.
 """
-import os
-import sys
-
 import keyring
 
 from gsheet_keyring import GoogleSheetKeyring
