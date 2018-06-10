@@ -25,7 +25,3 @@ If you use gsheet-keyring from Google Colaboratory, Google Compute Engine, or
 <https://cloud.google.com/docs/authentication/production#obtaining_credentials_on_compute_engine_kubernetes_engine_app_engine_flexible_environment_and_cloud_functions>`_,
 you don't need to obtain a credentials file. In these cases, you can instantiate
 :class:`GoogleSheetKeyring` without a ``credentials`` argument.
-
- and the :mod:`oauth2client` package
-        is present, it's computed from
-        :func:`oauth2client.client.GoogleCredentials.get_application_default`.
