@@ -34,8 +34,7 @@ UPDATED_AT_COL = 5
 
 
 class GoogleSheetKeyring(keyring.backend.KeyringBackend):
-    """A Keyring back end backed by a Google Sheet.
-    """
+    """A Keyring back end backed by a Google Sheet."""
 
     _sheet_key = None
     _sheet_title = 'keyring'
@@ -50,7 +49,8 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
 
     def __init__(self, *, sheet_key=None, sheet_title='keyring', sheet_url=None,
                  credentials=None, worksheet=None):
-        """
+        """Initialize a :class:`GoogleSheetKeyring`.
+
         The Google Sheet may be specified with a variety of parameters. They
         have the precedence `worksheet` > `sheet_url` > `sheet_key` >
         `sheet_title`. The first truthy parameter is used. Lower-precedence
@@ -83,7 +83,7 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
     @property
     @lru_cache(maxsize=1)
     def credentials(self):
-        """An instance of :class:`oauth2client.client.GoogleCredentials`.
+        """Return an instance of :class:`oauth2client.client.GoogleCredentials`.
 
         This has the value of the ``credentials`` initialization parameter.
 
@@ -110,8 +110,7 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
     @property
     @lru_cache(maxsize=1)
     def sheet(self):
-        """The :class:`gspread.models.Worksheet` that is used as a backing
-        store."""
+        """Return the backing store :class:`gspread.models.Worksheet`."""
         if self._worksheet:
             return self._worksheet
         key = self._sheet_key
@@ -146,7 +145,9 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
         return self.__cache
 
     def _current_time(self):
-        """Get current time formatted s.t Google Sheets recognizes it as a
+        """Return the current time, formatted for Google Sheets.
+
+        Get the current time formatted s.t Google Sheets recognizes it as a
         datetime.
 
         Google Sheets doesn't recognize datetime formats with timezones. We use
@@ -156,8 +157,7 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
         return dt.strftime('%Y-%m-%d %H:%M')
 
     def _find_rows(self, servicename, username):
-        """Get a set of row numbers that match the provided servicename and username.
-        """
+        """Get a set of row numbers that match the provided servicename and username."""
         ws = self.sheet
         servicename_rows = {c.row for c in ws.findall(servicename)
                             if c.col == SERVICENAME_COL}
@@ -166,8 +166,7 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
         return servicename_rows & username_rows
 
     def set_password(self, servicename, username, password):
-        """Set password for the username of the service
-        """
+        """Set password for the username of the service."""
         ts = self._current_time()
         ws = self.sheet
         cache_key = (servicename, username)
@@ -190,8 +189,7 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
         self._cache[cache_key] = password
 
     def get_password(self, servicename, username):
-        """Get password of the username for the service
-        """
+        """Get password of the username for the service."""
         cache_key = (servicename, username)
         if cache_key in self._cache:
             return self._cache[cache_key]
@@ -202,8 +200,7 @@ class GoogleSheetKeyring(keyring.backend.KeyringBackend):
         return password
 
     def delete_password(self, servicename, username):
-        """Delete the password for the username of the service.
-        """
+        """Delete the password for the username of the service."""
         ws = self.sheet
         rows = self._find_rows(servicename, username)
         if not rows:
